@@ -12,13 +12,13 @@ class RateLimiterTest {
 
     @Test
     fun `rate limiter test`() {
-        val rlConfig = RateLimiterConfiguration.defaultRLConfiguration
+        val rlConfig = RateLimiterConfiguration()
 
         var result = ""
 
         repeat(times = 5) {
             result += try {
-                resilience(name = "test-rl", rateLimiterConfig = rlConfig) {
+                resilience(name = "test-rl", rateLimiterConfiguration = rlConfig) {
                     "OK"
                 }
                 "+"

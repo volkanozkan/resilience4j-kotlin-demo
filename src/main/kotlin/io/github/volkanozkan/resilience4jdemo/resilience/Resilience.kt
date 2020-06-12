@@ -18,19 +18,21 @@ class Resilience {
 
     operator fun <T> invoke(
         name: String,
-        rateLimiterConfig: RateLimiterConfiguration? = null,
+        rateLimiterConfiguration: RateLimiterConfiguration? = null,
+        circuitBreakerConfiguration: CircuitBreakerConfiguration? = null,
         block: () -> T
     ): T {
-        return resilient(name, rateLimiterConfig, block)
+        return resilient(name, rateLimiterConfiguration, circuitBreakerConfiguration, block)
     }
 
     private fun <T> resilient(
         name: String,
-        rateLimiterConfig: RateLimiterConfiguration? = null,
+        rateLimiterConfiguration: RateLimiterConfiguration? = null,
+        circuitBreakerConfiguration: CircuitBreakerConfiguration? = null,
         block: () -> T
     ): T {
-        val rateLimiter = createRateLimiter(name, rateLimiterConfig)
-        val circuitBreaker = createCircuitBreaker(name)
+        val rateLimiter = buildRateLimiter(name, rateLimiterConfiguration)
+        val circuitBreaker = buildCircuitBreaker(name, circuitBreakerConfiguration)
 
         val cbDecorated = CircuitBreaker.decorateCheckedSupplier(circuitBreaker, block)
         val decorated = RateLimiter.decorateCheckedSupplier(rateLimiter, cbDecorated)
@@ -38,20 +40,21 @@ class Resilience {
         return decorated.apply()
     }
 
-    private fun createCircuitBreaker(
-        name: String
+    private fun buildCircuitBreaker(
+        name: String,
+        circuitBreakerConfiguration: CircuitBreakerConfiguration?
     ): CircuitBreaker {
         return cbRegistry.circuitBreaker(name) {
-            CircuitBreakerConfig.ofDefaults()
+            circuitBreakerConfiguration?.let { buildCircuitBreakerConfig(it) } ?: CircuitBreakerConfig.ofDefaults()
         }
     }
 
-    private fun createRateLimiter(
+    private fun buildRateLimiter(
         name: String,
-        rateLimiterConfig: RateLimiterConfiguration?
+        rateLimiterConfiguration: RateLimiterConfiguration?
     ): RateLimiter {
         return rlRegistry.rateLimiter(name) {
-            rateLimiterConfig?.let { buildRateLimiterConfig(it) } ?: RateLimiterConfig.ofDefaults()
+            rateLimiterConfiguration?.let { buildRateLimiterConfig(it) } ?: RateLimiterConfig.ofDefaults()
         }
     }
 
@@ -60,6 +63,16 @@ class Resilience {
             .limitForPeriod(rlConfig.limitForPeriod)
             .limitRefreshPeriod(rlConfig.refreshPeriod)
             .timeoutDuration(rlConfig.timeout)
+            .build()
+    }
+
+    private fun buildCircuitBreakerConfig(cbConfig: CircuitBreakerConfiguration): CircuitBreakerConfig {
+        return CircuitBreakerConfig.custom()
+            .failureRateThreshold(cbConfig.failureRateThreshold)
+            .slidingWindowSize(cbConfig.slidingWindowSize)
+            .permittedNumberOfCallsInHalfOpenState(cbConfig.permittedNumberOfCallsInHalfOpenState)
+            .minimumNumberOfCalls(cbConfig.minimumNumberOfCalls)
+            .waitDurationInOpenState(cbConfig.waitDurationInOpenState)
             .build()
     }
 }
