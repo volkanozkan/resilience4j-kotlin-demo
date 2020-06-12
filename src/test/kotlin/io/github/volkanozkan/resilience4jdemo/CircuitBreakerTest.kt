@@ -65,11 +65,11 @@ class CircuitBreakerTest {
             } catch (e: CallNotPermittedException) {
                 result += "-"
             } catch (e: Exception) {
-                result += "*"
+                result += "?"
             }
         }
 
-        assertThat("+**------------").isEqualTo(result)
+        assertThat("+??------------").isEqualTo(result)
         assertThat(CircuitBreaker.State.OPEN).isEqualTo(Resilience.cbRegistry.circuitBreaker(cbName).state)
     }
 

@@ -55,6 +55,10 @@ class Resilience {
     ): RateLimiter {
         return rlRegistry.rateLimiter(name) {
             rateLimiterConfiguration?.let { buildRateLimiterConfig(it) } ?: RateLimiterConfig.ofDefaults()
+        }.also {
+            it.eventPublisher
+                .onEvent { event -> // logger.info(...)
+                }
         }
     }
 
