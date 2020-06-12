@@ -4,7 +4,7 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
 import io.github.volkanozkan.resilience4jdemo.resilience.CircuitBreakerConfiguration
 import io.github.volkanozkan.resilience4jdemo.resilience.Resilience
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 
@@ -16,9 +16,9 @@ class CircuitBreakerTest {
     fun `circuit breaker should closed with default CB configs`() {
         val cbName = "test-cb"
 
-        assertEquals(CircuitBreaker.State.CLOSED, Resilience.cbRegistry.circuitBreaker(cbName).state)
+        assertThat(CircuitBreaker.State.CLOSED).isEqualTo(Resilience.cbRegistry.circuitBreaker(cbName).state)
 
-        var output = ""
+        var result = ""
         var i = 0
         repeat(times = 11) {
             try {
@@ -27,18 +27,18 @@ class CircuitBreakerTest {
                     if (i == 5 || i == 10) {
                         throw Exception("CB")
                     }
-                    output += "+"
+                    result += "+"
                     i
                 }
             } catch (e: CallNotPermittedException) {
-                output += "-"
+                result += "-"
             } catch (e: Exception) {
-                output += "*"
+                result += "*"
             }
         }
 
-        assertEquals("++++*++++*+", output)
-        assertEquals(CircuitBreaker.State.CLOSED, Resilience.cbRegistry.circuitBreaker(cbName).state)
+        assertThat("++++*++++*+").isEqualTo(result)
+        assertThat(CircuitBreaker.State.CLOSED).isEqualTo(Resilience.cbRegistry.circuitBreaker(cbName).state)
     }
 
     @Test
@@ -50,7 +50,7 @@ class CircuitBreakerTest {
 
         val cbName = "test-cb2"
 
-        var output = ""
+        var result = ""
         var i = 0
         repeat(times = 15) {
             try {
@@ -59,18 +59,18 @@ class CircuitBreakerTest {
                     if (i >= 2) {
                         throw Exception("CB")
                     }
-                    output += "+"
+                    result += "+"
                     i
                 }
             } catch (e: CallNotPermittedException) {
-                output += "-"
+                result += "-"
             } catch (e: Exception) {
-                output += "*"
+                result += "*"
             }
         }
 
-        assertEquals("+**------------", output)
-        assertEquals(CircuitBreaker.State.OPEN, Resilience.cbRegistry.circuitBreaker(cbName).state)
+        assertThat("+**------------").isEqualTo(result)
+        assertThat(CircuitBreaker.State.OPEN).isEqualTo(Resilience.cbRegistry.circuitBreaker(cbName).state)
     }
 
 }
