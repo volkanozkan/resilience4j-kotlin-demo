@@ -46,6 +46,10 @@ class Resilience {
     ): CircuitBreaker {
         return cbRegistry.circuitBreaker(name) {
             circuitBreakerConfiguration?.let { buildCircuitBreakerConfig(it) } ?: CircuitBreakerConfig.ofDefaults()
+        }.also {
+            it.eventPublisher
+                .onEvent { event -> // logger.info(...)
+                }
         }
     }
 
