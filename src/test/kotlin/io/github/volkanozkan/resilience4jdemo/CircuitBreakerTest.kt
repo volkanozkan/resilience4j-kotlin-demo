@@ -27,7 +27,7 @@ class CircuitBreakerTest {
                     if (i == 5 || i == 10) {
                         throw Exception("CB")
                     }
-                    output += "."
+                    output += "+"
                     i
                 }
             } catch (e: CallNotPermittedException) {
@@ -37,7 +37,7 @@ class CircuitBreakerTest {
             }
         }
 
-        assertEquals("....*....*.", output)
+        assertEquals("++++*++++*+", output)
         assertEquals(CircuitBreaker.State.CLOSED, Resilience.cbRegistry.circuitBreaker(cbName).state)
     }
 
