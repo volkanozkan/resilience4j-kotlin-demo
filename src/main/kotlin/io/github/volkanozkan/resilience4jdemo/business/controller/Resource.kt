@@ -39,6 +39,6 @@ class Resource(private val service: Service) {
     @ExceptionHandler(IllegalArgumentException::class)
     fun exceptionHandler(exception: IllegalArgumentException): ResponseEntity<String> {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body("Illegal Argument Exception but circuit breaker is still closed and allows more call.")
+            .body("Received Illegal Argument Exception. Circuit breaker is still closed and allows for more call.")
     }
 }

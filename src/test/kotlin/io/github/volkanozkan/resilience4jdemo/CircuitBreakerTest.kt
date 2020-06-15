@@ -3,26 +3,26 @@ package io.github.volkanozkan.resilience4jdemo
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
 import io.github.volkanozkan.resilience4jdemo.resilience.CircuitBreakerConfiguration
-import io.github.volkanozkan.resilience4jdemo.resilience.Resilience
+import io.github.volkanozkan.resilience4jdemo.resilience.ResiliencyHelper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 
 class CircuitBreakerTest {
 
-    private val resilience = Resilience()
+    private val resiliencyHelper = ResiliencyHelper()
 
     @Test
     fun `circuit breaker should closed with default CB configs`() {
         val cbName = "test-cb"
 
-        assertThat(CircuitBreaker.State.CLOSED).isEqualTo(Resilience.cbRegistry.circuitBreaker(cbName).state)
+        assertThat(CircuitBreaker.State.CLOSED).isEqualTo(ResiliencyHelper.cbRegistry.circuitBreaker(cbName).state)
 
         var result = ""
         var i = 0
         repeat(times = 11) {
             try {
-                resilience(name = cbName) {
+                resiliencyHelper.runResiliently(name = cbName) {
                     i++
                     if (i == 5 || i == 10) {
                         throw Exception("CB")
@@ -38,7 +38,7 @@ class CircuitBreakerTest {
         }
 
         assertThat("++++?++++?+").isEqualTo(result)
-        assertThat(CircuitBreaker.State.CLOSED).isEqualTo(Resilience.cbRegistry.circuitBreaker(cbName).state)
+        assertThat(CircuitBreaker.State.CLOSED).isEqualTo(ResiliencyHelper.cbRegistry.circuitBreaker(cbName).state)
     }
 
     @Test
@@ -54,7 +54,7 @@ class CircuitBreakerTest {
         var i = 0
         repeat(times = 15) {
             try {
-                resilience(name = cbName, circuitBreakerConfiguration = cbConfig) {
+                resiliencyHelper.runResiliently(name = cbName, circuitBreakerConfiguration = cbConfig) {
                     i++
                     if (i >= 2) {
                         throw Exception("CB")
@@ -70,7 +70,7 @@ class CircuitBreakerTest {
         }
 
         assertThat("+??------------").isEqualTo(result)
-        assertThat(CircuitBreaker.State.OPEN).isEqualTo(Resilience.cbRegistry.circuitBreaker(cbName).state)
+        assertThat(CircuitBreaker.State.OPEN).isEqualTo(ResiliencyHelper.cbRegistry.circuitBreaker(cbName).state)
     }
 
 }

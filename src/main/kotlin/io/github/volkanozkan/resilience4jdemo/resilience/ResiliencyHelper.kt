@@ -9,14 +9,14 @@ import io.github.resilience4j.ratelimiter.RateLimiterRegistry
 import org.springframework.stereotype.Component
 
 @Component
-class Resilience {
+class ResiliencyHelper {
 
     companion object {
         val cbRegistry: CircuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
         val rlRegistry: RateLimiterRegistry = RateLimiterRegistry.ofDefaults()
     }
 
-    operator fun <T> invoke(
+    fun <T> runResiliently(
         name: String,
         rateLimiterConfiguration: RateLimiterConfiguration? = null,
         circuitBreakerConfiguration: CircuitBreakerConfiguration? = null,
@@ -39,7 +39,8 @@ class Resilience {
             circuitBreakerConfiguration?.let { buildCircuitBreakerConfig(it) } ?: CircuitBreakerConfig.ofDefaults()
         }.also {
             it.eventPublisher
-                .onEvent { event -> // logger.info(...)
+                .onEvent {
+                    //event -> logger.info(...)
                 }
         }
     }
@@ -52,7 +53,8 @@ class Resilience {
             rateLimiterConfiguration?.let { buildRateLimiterConfig(it) } ?: RateLimiterConfig.ofDefaults()
         }.also {
             it.eventPublisher
-                .onEvent { event -> // logger.info(...)
+                .onEvent {
+                    //event -> logger.info(...)
                 }
         }
     }
