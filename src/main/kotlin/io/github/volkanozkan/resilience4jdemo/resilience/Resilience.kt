@@ -22,15 +22,6 @@ class Resilience {
         circuitBreakerConfiguration: CircuitBreakerConfiguration? = null,
         block: () -> T
     ): T {
-        return resilient(name, rateLimiterConfiguration, circuitBreakerConfiguration, block)
-    }
-
-    private fun <T> resilient(
-        name: String,
-        rateLimiterConfiguration: RateLimiterConfiguration? = null,
-        circuitBreakerConfiguration: CircuitBreakerConfiguration? = null,
-        block: () -> T
-    ): T {
         val rateLimiter = buildRateLimiter(name, rateLimiterConfiguration)
         val circuitBreaker = buildCircuitBreaker(name, circuitBreakerConfiguration)
 
